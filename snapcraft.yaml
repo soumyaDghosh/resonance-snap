@@ -1,1 +1,50 @@
+name: resonance
+base: core22
+version: 'alpha'
+adopt-info: resonance
+grade: stable
+confinement: strict
+compression: lzo
+architectures:
+  - build-on: amd64
+  - build-on: armhf
+  - build-on: arm64
+  
+slots:
+  resonance:
+    interface: dbus
+    bus: session
+    name: io.github.nate_xyz.Resonance
 
+apps:
+  resonance:
+    command: usr/bin/resonance
+    extensions: [gnome]
+    plugs:
+      - home
+      - network
+      - network-status
+      - optical-drive
+      - removable-media
+    common-id: io.github.nate_xyz.Resonance
+    desktop: usr/share/applications/.github.nate_xyz.Resonance.desktop
+    
+    
+parts:
+  resonance:
+    source: https://github.com/nate-xyz/resonance.git
+    plugin: meson
+    parse-info: [usr/share/metainfo/io.github.nate_xyz.Resonance.appdata.xml]
+    meson-parameters:
+      - --prefix=/usr
+    build-packages:
+      - build-essential 
+      - rustc 
+      - libgstreamer-plugins-bad1.0-dev 
+      - libgstreamer-plugins-base1.0-dev 
+      - libgstreamer1.0-dev
+    stage-packages:
+      - python3-loguru 
+      - python3-mutagen 
+      - python3-tqdm 
+    
