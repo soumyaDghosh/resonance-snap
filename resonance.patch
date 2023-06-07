@@ -26,3 +26,22 @@ diff -Naur a/data/io.github.nate_xyz.Resonance.desktop.in b/data/io.github.nate_
 -Keywords=music;sound;player;media;audio;playlist;
 \ No newline at end of file
 +Keywords=music;sound;player;media;audio;playlist;
+diff -Naur a/src/player/mpris_controller.rs b/src/player/mpris_controller.rs
+--- a/src/player/mpris_controller.rs	2023-06-07 20:26:52.535266511 +0530
++++ b/src/player/mpris_controller.rs	2023-06-07 20:27:45.703365171 +0530
+@@ -35,7 +35,7 @@
+ impl MprisController {
+     pub fn new(sender: Sender<PlaybackAction>, mb_sender: Sender<MusicBrainzAction>, mb_receiver: Receiver<(i64, String)>) -> Rc<Self> {
+         let mpris = MprisPlayer::new(
+-            "io.github.nate_xyz.Resonance".to_string(),
++            "Resonance".to_string(),
+             "Resonance".to_string(),
+             "io.github.nate_xyz.Resonance".to_string(),
+         );
+@@ -202,4 +202,4 @@
+             RepeatMode::Shuffle => self.mpris.set_loop_status(LoopStatus::Playlist),
+         }
+     }
+-}
+\ No newline at end of file
++}
