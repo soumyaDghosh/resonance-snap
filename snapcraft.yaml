@@ -1,6 +1,5 @@
 name: resonance
 base: core22
-version: 'alpha'
 adopt-info: resonance
 grade: stable
 confinement: strict
@@ -16,10 +15,55 @@ slots:
     bus: session
     name: io.github.nate_xyz.Resonance
 
+parts:
+  rustup:
+    plugin: nil
+    build-packages: [wget]
+    build-environment:
+      - RUSTUP_HOME: $CRAFT_PART_INSTALL/usr/share/rust
+      - CARGO_HOME: $CRAFT_PART_INSTALL/usr/share/rust
+      - CARGO_BUILD_JOBS: $CRAFT_PARALLEL_BUILD_COUNT
+    override-pull: |
+      wget https://sh.rustup.rs -O $CRAFT_PART_SRC/rustup-init.sh
+      chmod +x $CRAFT_PART_SRC/rustup-init.sh
+    override-build: |
+      $CRAFT_PART_SRC/rustup-init.sh -y --no-modify-path
+      mkdir -p $CRAFT_PART_INSTALL/usr/bin
+      for i in `ls $RUSTUP_HOME/bin/`; do
+        ln -s ../share/rust/bin/$i $CRAFT_PART_INSTALL/usr/bin/$i
+      done
+    override-prime: |
+      echo 'Skip Prime'
+  resonance:
+    after: [rustup]
+    source: https://github.com/nate-xyz/resonance.git
+    plugin: meson
+    parse-info: [usr/share/appdata/io.github.nate_xyz.Resonance.appdata.xml]
+    build-environment:
+      - RUSTUP_HOME: $CRAFT_STAGE/usr/share/rust
+      - CARGO_HOME: $CRAFT_STAGE/usr/share/rust
+      - CARGO_BUILD_JOBS: $CRAFT_PARALLEL_BUILD_COUNT
+    meson-parameters:
+      - --prefix=/snap/resonance/current/usr
+    build-packages:
+      - libgstreamer-plugins-bad1.0-dev
+      - libssl-dev
+    override-build: |
+      craftctl default
+      pip install --prefix=$CRAFT_PART_INSTALL/usr loguru==0.6.0
+      pip install --prefix=$CRAFT_PART_INSTALL/usr mutagen==1.46.0
+      pip install --prefix=$CRAFT_PART_INSTALL/usr tqdm==4.64.1
+      sed -e '1c#!/usr/bin/python3' -i $CRAFT_PART_INSTALL/usr/local/bin/*
+    organize:
+      usr/local: usr
+      snap/resonance/current: .
+      
 apps:
   resonance:
     command: usr/bin/resonance
     extensions: [gnome]
+    environment:
+      PYTHONPATH: $SNAP/usr/lib/python3.10/dist-packages:$PYTHONPATH
     plugs:
       - home
       - audio-playback
@@ -27,25 +71,7 @@ apps:
       - network-status
       - optical-drive
       - removable-media
+    slots:
+      - mpris
     common-id: io.github.nate_xyz.Resonance
-    desktop: usr/share/applications/.github.nate_xyz.Resonance.desktop
-    
-    
-parts:
-  resonance:
-    source: https://github.com/nate-xyz/resonance.git
-    plugin: meson
-    parse-info: [usr/share/metainfo/io.github.nate_xyz.Resonance.appdata.xml]
-    meson-parameters:
-      - --prefix=/usr
-    build-packages:
-      - build-essential 
-      - rustc 
-      - libgstreamer-plugins-bad1.0-dev 
-      - libgstreamer-plugins-base1.0-dev 
-      - libgstreamer1.0-dev
-    stage-packages:
-      - python3-loguru 
-      - python3-mutagen 
-      - python3-tqdm 
-    
+    desktop: usr/share/applications/io.github.nate_xyz.Resonance.desktop
