@@ -14,6 +14,9 @@ slots:
     interface: dbus
     bus: session
     name: io.github.nate_xyz.Resonance
+  resonance-mpris:
+    interface: mpris
+    name: Resonance
 
 parts:
   rustup:
@@ -48,12 +51,20 @@ parts:
     build-packages:
       - libgstreamer-plugins-bad1.0-dev
       - libssl-dev
+    override-pull: |
+      craftctl default
+      patch -p1 < $CRAFT_PROJECT_DIR/resonance.patch
     override-build: |
       craftctl default
       pip install --prefix=$CRAFT_PART_INSTALL/usr loguru==0.6.0
       pip install --prefix=$CRAFT_PART_INSTALL/usr mutagen==1.46.0
       pip install --prefix=$CRAFT_PART_INSTALL/usr tqdm==4.64.1
       sed -e '1c#!/usr/bin/python3' -i $CRAFT_PART_INSTALL/usr/local/bin/*
+      mkdir -p $CRAFT_PART_INSTALL/meta/gui
+      cp -r $CRAFT_PART_INSTALL/snap/resonance/current/usr/share/icons $CRAFT_PART_INSTALL/meta/gui/
+      for i in `find $CRAFT_PART_INSTALL/meta/gui/icons -name "*.svg" -o -name "*.png"`; do
+        mv $i "`dirname $i`/snap.$CRAFT_PROJECT_NAME.`basename $i`"
+      done
     organize:
       usr/local: usr
       snap/resonance/current: .
