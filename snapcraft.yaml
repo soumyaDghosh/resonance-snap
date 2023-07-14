@@ -8,7 +8,7 @@ architectures:
   - build-on: amd64
   - build-on: armhf
   - build-on: arm64
-  
+
 slots:
   resonance:
     interface: dbus
@@ -40,6 +40,8 @@ parts:
   resonance:
     after: [rustup]
     source: https://github.com/nate-xyz/resonance.git
+    #source-tag:
+    source-depth: 1
     plugin: meson
     parse-info: [usr/share/appdata/io.github.nate_xyz.Resonance.appdata.xml]
     build-environment:
